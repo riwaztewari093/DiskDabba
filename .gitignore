@@ -53,5 +53,9 @@ web/supabase/.temp/
 *.tsbuildinfo
 next-env.d.ts
 
+# Cloudflare & Wrangler
+.cloudflare/
+.wrangler/
+
 # Testing
 coverage/
