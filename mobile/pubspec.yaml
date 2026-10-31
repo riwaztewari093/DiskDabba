@@ -1,0 +1,65 @@
+name: diskdabba
+description: DiskDabba - Free cloud storage for everyone.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Supabase
+  supabase_flutter: ^2.8.0
+
+  # State management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Routing
+  go_router: ^14.8.1
+
+  # HTTP
+  http: ^1.4.0
+
+  # Environment variables
+  flutter_dotenv: ^5.2.1
+
+  # File handling
+  file_picker: ^8.1.7
+  path_provider: ^2.1.5
+  path: ^1.9.1
+  mime: ^2.0.0
+
+  # Image/media
+  cached_network_image: ^3.4.1
+  photo_manager: ^3.6.3
+
+  # UI
+  cupertino_icons: ^1.0.8
+  flutter_svg: ^2.0.17
+  shimmer: ^3.0.0
+
+  # Utils
+  intl: ^0.19.0
+  uuid: ^4.5.1
+  crypto: ^3.0.6
+  shared_preferences: ^2.3.5
+  connectivity_plus: ^6.1.1
+  permission_handler: ^11.3.1
+  workmanager: ^0.5.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  riverpod_generator: ^2.6.3
+  build_runner: ^2.4.14
+  json_serializable: ^6.9.3
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - .env
