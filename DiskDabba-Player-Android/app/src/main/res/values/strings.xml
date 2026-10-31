@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">DiskDabba</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_saved">Saved</string>
+    <string name="tab_profile">My Profile</string>
+    <string name="enter_link_hint">Enter link here ...</string>
+    <string name="recent_history">Recent History</string>
+    <string name="go_premium">Go Premium</string>
+    <string name="premium_subtitle">Ad-free experience, faster downloads &amp; more</string>
+    <string name="upgrade">Upgrade</string>
+    <string name="no_history">No history yet. Play some media to see recents.</string>
+    <string name="file_details">File Details</string>
+    <string name="scroll_down_hint">Scroll down to open the file</string>
+    <string name="size">Size</string>
+    <string name="type">Type</string>
+    <string name="uploaded">Uploaded</string>
+    <string name="uploader">Uploader</string>
+    <string name="bookmark">Bookmark</string>
+    <string name="share">Share</string>
+    <string name="save_to_cloud">Save to Cloud</string>
+    <string name="settings">Settings</string>
+</resources>

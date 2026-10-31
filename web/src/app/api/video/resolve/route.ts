@@ -9,9 +9,14 @@ function extractIdentifier(rawInput: string): string {
   const trimmed = rawInput.trim();
 
   // If it's a full URL:
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("diskdabba://")) {
     try {
       const parsedUrl = new URL(trimmed);
+
+      // Check query params ?fileId=... or ?id=... or ?token=... first
+      const queryId = parsedUrl.searchParams.get("fileId") || parsedUrl.searchParams.get("id") || parsedUrl.searchParams.get("token");
+      if (queryId) return queryId;
+
       const pathSegments = parsedUrl.pathname.split("/").filter(Boolean);
       // Look for /v/:id or /app/:id or /share/:id or last segment
       if (pathSegments.length >= 2 && ["v", "app", "share", "video"].includes(pathSegments[0].toLowerCase())) {
@@ -20,9 +25,6 @@ function extractIdentifier(rawInput: string): string {
       if (pathSegments.length > 0) {
         return pathSegments[pathSegments.length - 1];
       }
-      // Check query params ?fileId=... or ?id=... or ?token=...
-      const queryId = parsedUrl.searchParams.get("fileId") || parsedUrl.searchParams.get("id") || parsedUrl.searchParams.get("token");
-      if (queryId) return queryId;
     } catch {
       // Continue to fallback
     }

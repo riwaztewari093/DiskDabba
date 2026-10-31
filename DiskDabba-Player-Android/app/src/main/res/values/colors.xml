@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_primary">#7C4DFF</color>
+    <color name="brand_primary_dark">#5E35B1</color>
+    <color name="brand_accent">#8C65FF</color>
+    <color name="brand_lavender">#F2EFFF</color>
+    <color name="brand_lavender_light">#F8F7FF</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="card_border">#ECEBF7</color>
+    <color name="text_primary">#1E1B4B</color>
+    <color name="text_secondary">#7E7E99</color>
+    <color name="badge_pro">#7C4DFF</color>
+    <color name="gold_crown">#F59E0B</color>
+    <color name="gold_crown_bg">#FEF3C7</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
