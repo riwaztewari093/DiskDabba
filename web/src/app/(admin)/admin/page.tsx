@@ -1,3 +1,5 @@
+export const runtime = "edge";
+
 import { createClient } from "@/lib/supabase/server";
 import { formatBytes } from "@/lib/utils";
 import { calculateCostEstimate } from "@/lib/cost-protection/calculator";
