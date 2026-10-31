@@ -17,7 +17,9 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { filename, sizeBytes, mimeType } = body;
+    const filename = body.filename || body.name;
+    const sizeBytes = body.sizeBytes || body.size;
+    const mimeType = body.mimeType || body.contentType || "application/octet-stream";
 
     if (!filename || !sizeBytes) {
       return NextResponse.json(
@@ -64,13 +66,14 @@ export async function POST(request: Request) {
     // 4. Generate presigned PUT URL
     const { uploadUrl, isMock, expiresIn } = await generatePresignedUploadUrl(
       s3Key,
-      mimeType || "application/octet-stream",
+      mimeType,
       sizeBytes
     );
 
     return NextResponse.json({
       fileId,
       s3Key,
+      key: s3Key,
       uploadUrl,
       isMock,
       expiresIn,

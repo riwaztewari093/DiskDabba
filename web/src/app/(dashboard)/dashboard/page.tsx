@@ -2,7 +2,7 @@
 
 export const runtime = "edge";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   BarChart3,
@@ -16,12 +16,23 @@ import {
   Check,
   FileVideo,
   FileText,
+  FileArchive,
+  FileAudio,
+  File,
   Trash2,
   Download,
   ExternalLink,
   Sparkles,
   Info,
   Clock,
+  Eye,
+  Wallet,
+  ArrowUpRight,
+  ShieldAlert,
+  Loader2,
+  Lock,
+  Globe,
+  Link2,
 } from "lucide-react";
 import { formatBytes } from "@/lib/utils";
 
@@ -31,43 +42,102 @@ interface FileItem {
   size: number;
   mime_type: string;
   created_at: string;
+  visibility?: string;
+  view_count?: number;
   shareUrl?: string;
 }
 
+interface AnalyticsData {
+  balanceInr: number;
+  totalEarnedInr: number;
+  paidInr: number;
+  pendingInr: number;
+  availableInr: number;
+  cpmRateInr: number;
+  totalViews: number;
+  totalFiles: number;
+  payoutStatus: string;
+}
+
 export default function DashboardPage() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [files, setFiles] = useState<FileItem[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsData>({
+    balanceInr: 2.355 * 85,
+    totalEarnedInr: 2.355 * 85,
+    paidInr: 0,
+    pendingInr: 0,
+    availableInr: 2.355 * 85,
+    cpmRateInr: 85.0,
+    totalViews: 28,
+    totalFiles: 1,
+    payoutStatus: "TEST_MODE_PAUSED",
+  });
+
+  // Upload States
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [files, setFiles] = useState<FileItem[]>([]);
-  const [stats, setStats] = useState({
-    totalFiles: 0,
-    storageUsedBytes: 0,
-    storageLimitBytes: 5368709120, // 5 GB
-    activeShares: 0,
-  });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load files and stats
+  // Withdrawal States
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState("100");
+  const [withdrawAddress, setWithdrawAddress] = useState("");
+  const [withdrawMethod, setWithdrawMethod] = useState("UPI");
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
+  const [withdrawMessage, setWithdrawMessage] = useState<string | null>(null);
+
+  // Load real files and analytics
   useEffect(() => {
-    // Demo seed item so user sees immediate results even on a brand-new account
-    const sampleDemoFile: FileItem = {
-      id: "6ae2b93ddfc8e29e5138c277",
-      name: "sample_launch_video.mp4",
-      size: 10297000,
-      mime_type: "video/mp4",
-      created_at: new Date().toISOString(),
-      shareUrl: `${window.location.origin}/app/6ae2b93ddfc8e29e5138c277`,
-    };
+    async function loadDashboardData() {
+      try {
+        // 1. Fetch files
+        const filesRes = await fetch("/api/files");
+        if (filesRes.ok) {
+          const filesData = await filesRes.json();
+          if (filesData.files && filesData.files.length > 0) {
+            setFiles(
+              filesData.files.map((f: any) => ({
+                ...f,
+                shareUrl: `${window.location.origin}/app/${f.id}`,
+              }))
+            );
+          } else {
+            // Seed sample demo file if no files uploaded yet
+            setFiles([
+              {
+                id: "6ae2b93ddfc8e29e5138c277",
+                name: "sample_launch_video.mp4",
+                size: 10297000,
+                mime_type: "video/mp4",
+                created_at: new Date().toISOString(),
+                visibility: "public",
+                view_count: 28,
+                shareUrl: `${window.location.origin}/app/6ae2b93ddfc8e29e5138c277`,
+              },
+            ]);
+          }
+        }
 
-    setFiles([sampleDemoFile]);
-    setStats({
-      totalFiles: 1,
-      storageUsedBytes: 10297000,
-      storageLimitBytes: 5368709120,
-      activeShares: 1,
-    });
+        // 2. Fetch analytics
+        const analyticsRes = await fetch("/api/analytics");
+        if (analyticsRes.ok) {
+          const aData = await analyticsRes.json();
+          if (aData.wallet) {
+            setAnalytics(aData.wallet);
+          }
+        }
+      } catch (err) {
+        console.error("Dashboard data load error:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboardData();
   }, []);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,83 +155,103 @@ export default function DashboardPage() {
     if (!selectedFile) return;
 
     setUploading(true);
-    setUploadProgress(10);
-    setUploadStatus("Requesting secure presigned S3 URL...");
+    setUploadProgress(5);
+    setUploadStatus("Requesting presigned upload credentials...");
 
     try {
-      // 1. Request presigned URL from our API
+      // 1. Presign request
       const presignRes = await fetch("/api/upload/presign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           filename: selectedFile.name,
-          contentType: selectedFile.type || "application/octet-stream",
+          mimeType: selectedFile.type || "application/octet-stream",
           sizeBytes: selectedFile.size,
         }),
       });
 
       if (!presignRes.ok) {
         const err = await presignRes.json();
-        throw new Error(err.error || "Failed to get presigned upload URL");
+        throw new Error(err.error || "Failed to initialize upload");
       }
 
-      const { uploadUrl, fileId, key, isMock } = await presignRes.json();
-      setUploadProgress(40);
+      const { uploadUrl, fileId, s3Key, key, isMock } = await presignRes.json();
+      const resolvedKey = s3Key || key;
+
       setUploadStatus("Uploading directly to Backblaze B2 Vault...");
 
-      // 2. Direct upload to S3 if not mock
+      // 2. Real XHR upload for accurate progress tracking
       if (!isMock && uploadUrl) {
-        const uploadRes = await fetch(uploadUrl, {
-          method: "PUT",
-          headers: {
-            "Content-Type": selectedFile.type || "application/octet-stream",
-          },
-          body: selectedFile,
-        });
+        await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("PUT", uploadUrl);
+          xhr.setRequestHeader(
+            "Content-Type",
+            selectedFile.type || "application/octet-stream"
+          );
 
-        if (!uploadRes.ok) {
-          throw new Error("Direct S3 upload failed");
-        }
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const percent = Math.round((event.loaded / event.total) * 90);
+              setUploadProgress(Math.max(10, percent));
+            }
+          };
+
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve(xhr.response);
+            } else {
+              reject(new Error(`Storage rejected upload with status ${xhr.status}`));
+            }
+          };
+
+          xhr.onerror = () => reject(new Error("Network failure during upload"));
+          xhr.send(selectedFile);
+        });
+      } else {
+        // Simulated progress for mock
+        setUploadProgress(90);
       }
 
-      setUploadProgress(80);
       setUploadStatus("Finalizing file record in database...");
 
-      // 3. Complete the upload
-      await fetch("/api/upload/complete", {
+      // 3. Complete record in Supabase
+      const completeRes = await fetch("/api/upload/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fileId,
-          key,
+          s3Key: resolvedKey,
           filename: selectedFile.name,
           sizeBytes: selectedFile.size,
           mimeType: selectedFile.type || "application/octet-stream",
+          visibility: "public",
         }),
       });
+
+      if (!completeRes.ok) {
+        const cErr = await completeRes.json();
+        throw new Error(cErr.error || "Failed to finalize database record");
+      }
 
       setUploadProgress(100);
       setUploadStatus("Upload complete!");
 
-      // 4. Add to state
+      // 4. Update UI state
       const newFileItem: FileItem = {
         id: fileId,
         name: selectedFile.name,
         size: selectedFile.size,
         mime_type: selectedFile.type || "application/octet-stream",
         created_at: new Date().toISOString(),
+        visibility: "public",
+        view_count: 0,
         shareUrl: `${window.location.origin}/app/${fileId}`,
       };
 
       setFiles((prev) => [newFileItem, ...prev]);
-      setStats((prev) => ({
-        ...prev,
-        totalFiles: prev.totalFiles + 1,
-        storageUsedBytes: prev.storageUsedBytes + selectedFile.size,
-        activeShares: prev.activeShares + 1,
-      }));
-
       setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
       setTimeout(() => setUploadStatus(null), 3000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Upload error";
@@ -172,294 +262,464 @@ export default function DashboardPage() {
     }
   };
 
-  const copyShareLink = (id: string, url?: string) => {
-    const finalUrl = url || `${window.location.origin}/app/${id}`;
-    navigator.clipboard.writeText(finalUrl);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+  const handleDeleteFile = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this file?")) return;
+
+    try {
+      const res = await fetch(`/api/files?id=${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setFiles((prev) => prev.filter((f) => f.id !== id));
+      } else {
+        alert("Failed to delete file");
+      }
+    } catch {
+      alert("Error deleting file");
+    }
+  };
+
+  const handleCopy = (id: string, url: string) => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(url);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    }
+  };
+
+  const handleWithdrawRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setWithdrawLoading(true);
+    setWithdrawMessage(null);
+
+    try {
+      const res = await fetch("/api/withdraw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: withdrawAmount,
+          paymentMethod: withdrawMethod,
+          paymentAddress: withdrawAddress,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setWithdrawMessage(
+          "Request recorded! Payout is marked as paused in test mode until genuine payment provider is verified."
+        );
+      } else {
+        alert(data.error || "Failed to submit withdrawal");
+      }
+    } catch {
+      alert("Network error submitting withdrawal request");
+    } finally {
+      setWithdrawLoading(false);
+    }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10 pb-16">
       {/* ============================================================ */}
-      {/* TITLE & BREADCRUMB (Matching DiskWala Screenshot 2)          */}
+      {/* 1. ANALYTICS & REVENUE OVERVIEW (DiskWala Screenshot 2)       */}
       {/* ============================================================ */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-950 flex items-center gap-2">
-          <BarChart3 className="h-7 w-7 text-emerald-600" />
-          <span>Analytics</span>
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500">
-          Track your storage capacity, shared links, and vault performance.
-        </p>
-      </div>
-
-      {/* ============================================================ */}
-      {/* 4 STAT OVERVIEW CARDS (Matching DiskWala Screenshot 2)       */}
-      {/* ============================================================ */}
-      <div className="rounded-3xl border border-zinc-200/90 bg-white p-6 shadow-sm">
-        <h2 className="text-base font-bold text-zinc-900 mb-4 flex items-center gap-2">
-          <span>Overview Summary</span>
-        </h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Total Files */}
-          <div className="flex items-center gap-4 rounded-2xl border border-zinc-100 bg-zinc-50/50 p-4 shadow-2xs">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-100 text-purple-700 shadow-xs">
-              <Files className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-zinc-500">Total Files</p>
-              <p className="text-xl font-extrabold text-zinc-900 mt-0.5">
-                {stats.totalFiles}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 2: Storage Used */}
-          <div className="flex items-center gap-4 rounded-2xl border border-zinc-100 bg-zinc-50/50 p-4 shadow-2xs">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 shadow-xs">
-              <HardDrive className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-zinc-500">Storage Used</p>
-              <p className="text-xl font-extrabold text-zinc-900 mt-0.5">
-                {formatBytes(stats.storageUsedBytes)}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 3: Active Shares */}
-          <div className="flex items-center gap-4 rounded-2xl border border-zinc-100 bg-zinc-50/50 p-4 shadow-2xs">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-700 shadow-xs">
-              <Share2 className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-zinc-500">Shareable Links</p>
-              <p className="text-xl font-extrabold text-zinc-900 mt-0.5">
-                {stats.activeShares}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 4: Safety Quota */}
-          <div className="flex items-center gap-4 rounded-2xl border border-zinc-100 bg-zinc-50/50 p-4 shadow-2xs">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-700 shadow-xs">
-              <Sparkles className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-zinc-500">Available Limit</p>
-              <p className="text-xl font-extrabold text-zinc-900 mt-0.5">
-                {formatBytes(stats.storageLimitBytes)}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ============================================================ */}
-      {/* DIRECT DRAG-AND-DROP UPLOAD SECTION                          */}
-      {/* ============================================================ */}
-      <section id="upload" className="rounded-3xl border border-zinc-200/90 bg-white p-6 sm:p-8 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <section className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
-              <UploadCloud className="h-5 w-5 text-emerald-600" />
-              <span>Instant High-Speed Upload</span>
-            </h2>
-            <p className="text-xs sm:text-sm text-zinc-500">
-              Files upload straight into your Backblaze B2 S3 vault. Max 100 MB per file.
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+              Analytics
+            </h1>
+            <p className="text-sm text-slate-500">
+              Track your revenue, daily and monthly performance.
             </p>
           </div>
+
+          <button
+            onClick={() => setShowWithdrawModal(true)}
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-500 via-sky-600 to-blue-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-sky-500/25 transition hover:from-sky-400 hover:to-blue-500"
+          >
+            <Wallet className="h-4 w-4" />
+            <span>Withdraw Earnings</span>
+          </button>
         </div>
 
-        {/* Upload Dropzone */}
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50/60 p-8 text-center hover:border-emerald-500 hover:bg-emerald-50/30 transition-all">
-          <input
-            type="file"
-            id="file-upload"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-          <label
-            htmlFor="file-upload"
-            className="flex flex-col items-center justify-center cursor-pointer group"
+        {/* 4 Revenue Overview Cards */}
+        <div className="rounded-3xl border border-sky-100 bg-white/90 p-6 sm:p-8 shadow-[0_10px_30px_rgba(14,165,233,0.06)] backdrop-blur-xl">
+          <div className="flex items-center gap-2 mb-6">
+            <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-sky-100 text-sky-600">
+              <Wallet className="h-4 w-4" />
+            </span>
+            <h2 className="text-base font-bold text-slate-900">Revenue Overview</h2>
+            <span className="text-xs text-slate-400 ml-auto hidden sm:inline">
+              Your overall paid, pending and available revenue breakdown.
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {/* Total */}
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-200/70 bg-slate-50/50 p-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-100 text-purple-700 shadow-xs">
+                <BarChart3 className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500">Total</p>
+                <p className="text-xl sm:text-2xl font-black text-slate-900">
+                  ₹{analytics.totalEarnedInr.toFixed(2)}
+                </p>
+                <p className="text-[10px] text-slate-400 font-mono">
+                  ~${(analytics.totalEarnedInr / 85).toFixed(3)}
+                </p>
+              </div>
+            </div>
+
+            {/* Paid */}
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-200/70 bg-slate-50/50 p-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 shadow-xs">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500">Paid</p>
+                <p className="text-xl sm:text-2xl font-black text-slate-900">
+                  ₹{analytics.paidInr.toFixed(2)}
+                </p>
+                <p className="text-[10px] text-slate-400">Processed</p>
+              </div>
+            </div>
+
+            {/* Available */}
+            <div className="flex items-center gap-4 rounded-2xl border border-sky-200/80 bg-sky-50/40 p-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-sky-700 shadow-xs">
+                <Wallet className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-sky-700">Available</p>
+                <p className="text-xl sm:text-2xl font-black text-sky-900">
+                  ₹{analytics.availableInr.toFixed(2)}
+                </p>
+                <p className="text-[10px] text-sky-600 font-medium">Ready for payout</p>
+              </div>
+            </div>
+
+            {/* Approved / Pending */}
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-200/70 bg-slate-50/50 p-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shadow-xs">
+                <Clock className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500">Pending</p>
+                <p className="text-xl sm:text-2xl font-black text-slate-900">
+                  ₹{analytics.pendingInr.toFixed(2)}
+                </p>
+                <p className="text-[10px] text-slate-400">Verification</p>
+              </div>
+            </div>
+          </div>
+
+          {/* CPM Breakdown Info */}
+          <div className="mt-6 rounded-2xl border border-sky-100 bg-sky-50/40 p-5">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-sky-600 shrink-0 mt-0.5" />
+              <div className="space-y-1 text-xs sm:text-sm text-slate-600">
+                <p className="font-bold text-slate-900">
+                  How CPM Earnings Work (Base Rate: ₹{analytics.cpmRateInr.toFixed(2)} per 1,000 views)
+                </p>
+                <p>
+                  Every unique view on your shared video links logs an eligible impression. Earnings automatically credit to your creator wallet. Payouts are in test mode until verified payout gateways are attached.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/* 2. DIRECT CLOUD UPLOAD INTERFACE                             */}
+      {/* ============================================================ */}
+      <section id="upload" className="space-y-4">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight text-slate-900">
+            Upload Content
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500">
+            Upload files directly to the Backblaze B2 Vault. Max 100 MB per file.
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-sky-100 bg-white/90 p-6 sm:p-8 shadow-[0_10px_30px_rgba(14,165,233,0.06)] backdrop-blur-xl">
+          {/* Dropzone */}
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-sky-200 bg-sky-50/30 p-8 text-center cursor-pointer transition hover:border-sky-400 hover:bg-sky-50/60 group"
           >
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-xs group-hover:scale-105 transition-transform mb-4">
-              <UploadCloud className="h-8 w-8" />
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-100 text-sky-600 mb-3 shadow-inner group-hover:scale-105 transition-transform">
+              <UploadCloud className="h-7 w-7" />
             </div>
-            <p className="text-sm font-bold text-zinc-800">
-              {selectedFile ? selectedFile.name : "Click to select a file or drag & drop here"}
+            <p className="text-sm font-bold text-slate-800">
+              {selectedFile ? selectedFile.name : "Click to select or drag and drop files"}
             </p>
-            <p className="text-xs text-zinc-500 mt-1">
-              Supports MP4, MKV, PDF, ZIP, PNG, JPG (up to 100 MB)
+            <p className="mt-1 text-xs text-slate-500">
+              {selectedFile
+                ? `${formatBytes(selectedFile.size)} selected`
+                : "Supports MP4, WebM, MKV, ZIP, PDF, audio and images up to 100 MB"}
             </p>
-          </label>
+          </div>
 
-          {selectedFile && (
-            <div className="mt-6 flex items-center gap-3">
-              <button
-                disabled={uploading}
-                onClick={handleUpload}
-                className="flex items-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-700 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50"
-              >
-                {uploading ? "Uploading to B2 Vault..." : "Start Secure Upload"}
-              </button>
-              <button
-                disabled={uploading}
-                onClick={() => setSelectedFile(null)}
-                className="rounded-full border border-zinc-200 px-4 py-2 text-xs font-semibold text-zinc-600 hover:bg-zinc-100"
-              >
-                Cancel
-              </button>
-            </div>
-          )}
-
-          {uploadStatus && (
-            <div className="mt-4 w-full max-w-xs">
-              <div className="h-1.5 w-full bg-zinc-200 rounded-full overflow-hidden">
+          {/* Upload Progress and Status */}
+          {uploading && (
+            <div className="mt-5 space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                <span className="flex items-center gap-1.5 text-sky-600">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  {uploadStatus || "Uploading..."}
+                </span>
+                <span className="font-mono">{uploadProgress}%</span>
+              </div>
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
                 <div
-                  className="h-full bg-emerald-600 transition-all duration-300"
+                  className="h-full rounded-full bg-gradient-to-r from-sky-500 to-blue-600 transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
-              <p className="text-xs text-zinc-500 mt-2 text-center font-medium">
-                {uploadStatus}
-              </p>
+            </div>
+          )}
+
+          {/* Upload Action Button */}
+          {selectedFile && !uploading && (
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={handleUpload}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-500 via-sky-600 to-blue-600 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-500/25 transition hover:from-sky-400 hover:to-blue-500"
+              >
+                <UploadCloud className="h-4 w-4" />
+                <span>Upload to Cloud Vault</span>
+              </button>
             </div>
           )}
         </div>
       </section>
 
       {/* ============================================================ */}
-      {/* RECENT FILES & SHARING MANAGER (Matching DiskWala style)     */}
+      {/* 3. FILE MANAGER & SHARED CONTENT                             */}
       {/* ============================================================ */}
-      <section id="files" className="rounded-3xl border border-zinc-200/90 bg-white p-6 sm:p-8 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
+      <section id="files" className="space-y-4">
+        <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
-              <Files className="h-5 w-5 text-emerald-600" />
-              <span>Your Vault Files &amp; Share Links</span>
+            <h2 className="text-xl font-bold tracking-tight text-slate-900">
+              Your Files & Videos
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-500">
-              Click any link to inspect the viewer screen or copy the link to share.
+            <p className="text-xs sm:text-sm text-slate-500">
+              Manage your uploaded media and generate instant viewer links.
             </p>
           </div>
+          <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+            {files.length} {files.length === 1 ? "file" : "files"}
+          </span>
         </div>
 
-        <div className="divide-y divide-zinc-100">
-          {files.map((file) => {
-            const isVid = file.mime_type.startsWith("video/") || file.name.endsWith(".mp4");
-            return (
-              <div
-                key={file.id}
-                className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-zinc-50/70 p-3 rounded-2xl transition"
-              >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100">
-                    {isVid ? (
-                      <FileVideo className="h-5 w-5 text-emerald-600" />
-                    ) : (
-                      <FileText className="h-5 w-5 text-emerald-600" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-zinc-900 truncate">
-                      {file.name}
-                    </p>
-                    <p className="text-xs text-zinc-500 flex items-center gap-2 mt-0.5">
-                      <span>{formatBytes(file.size)}</span>
-                      <span>•</span>
-                      <span className="font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px]">
-                        {file.mime_type}
-                      </span>
-                    </p>
-                  </div>
-                </div>
+        <div className="rounded-3xl border border-sky-100 bg-white/90 shadow-[0_10px_30px_rgba(14,165,233,0.06)] backdrop-blur-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/60 text-xs font-extrabold uppercase text-slate-400">
+                  <th className="py-3.5 px-4 sm:px-6">Name</th>
+                  <th className="py-3.5 px-4">Size</th>
+                  <th className="py-3.5 px-4">Views</th>
+                  <th className="py-3.5 px-4">Visibility</th>
+                  <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                {files.map((file) => {
+                  const isVid =
+                    file.name.match(/\.(mp4|webm|mkv|mov|avi)$/i) ||
+                    file.mime_type.startsWith("video/");
 
-                {/* Actions */}
-                <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                  <Link
-                    href={`/app/${file.id}`}
-                    target="_blank"
-                    className="flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition"
-                  >
-                    <ExternalLink className="h-3.5 w-3.5 text-zinc-500" />
-                    <span>Open Viewer</span>
-                  </Link>
+                  return (
+                    <tr key={file.id} className="hover:bg-slate-50/70 transition">
+                      <td className="py-4 px-4 sm:px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-600">
+                            {isVid ? (
+                              <FileVideo className="h-5 w-5" />
+                            ) : (
+                              <File className="h-5 w-5" />
+                            )}
+                          </div>
+                          <div className="min-w-0 max-w-xs sm:max-w-md">
+                            <p className="truncate font-bold text-slate-900">
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              {new Date(file.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
 
-                  <button
-                    onClick={() => copyShareLink(file.id, file.shareUrl)}
-                    className="flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition cursor-pointer"
-                  >
-                    {copiedId === file.id ? (
-                      <>
-                        <Check className="h-3.5 w-3.5 text-emerald-600" />
-                        <span>Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-3.5 w-3.5" />
-                        <span>Copy Share Link</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+                      <td className="py-4 px-4 text-xs font-mono text-slate-600">
+                        {formatBytes(file.size)}
+                      </td>
+
+                      <td className="py-4 px-4">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
+                          <Eye className="h-3 w-3 text-slate-400" />
+                          {file.view_count ?? 0}
+                        </span>
+                      </td>
+
+                      <td className="py-4 px-4">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-700 bg-sky-50 border border-sky-200/60 px-2.5 py-0.5 rounded-full">
+                          <Globe className="h-3 w-3 text-sky-500" />
+                          {file.visibility || "Public"}
+                        </span>
+                      </td>
+
+                      <td className="py-4 px-4 sm:px-6 text-right">
+                        <div className="inline-flex items-center gap-2">
+                          <Link
+                            href={`/app/${file.id}`}
+                            target="_blank"
+                            className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:border-sky-300 hover:text-sky-600 transition shadow-xs"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                            <span>Viewer</span>
+                          </Link>
+
+                          <button
+                            onClick={() =>
+                              handleCopy(
+                                file.id,
+                                `${window.location.origin}/app/${file.id}`
+                              )
+                            }
+                            className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:border-sky-300 hover:text-sky-600 transition shadow-xs"
+                          >
+                            {copiedId === file.id ? (
+                              <>
+                                <Check className="h-3.5 w-3.5 text-sky-600" />
+                                <span className="text-sky-600">Copied</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="h-3.5 w-3.5" />
+                                <span>Copy Link</span>
+                              </>
+                            )}
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteFile(file.id)}
+                            className="p-1.5 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
+                            title="Delete File"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
       {/* ============================================================ */}
-      {/* HOW CPM & BANDWIDTH WORKS (Directly inspired by DiskWala)     */}
+      {/* WITHDRAWAL MODAL                                             */}
       {/* ============================================================ */}
-      <div className="rounded-3xl border border-zinc-200/90 bg-white p-6 sm:p-8 shadow-sm">
-        <div className="flex items-center gap-2 text-emerald-700 text-sm font-bold mb-2">
-          <Info className="h-4 w-4" />
-          <span>How Cost Safeguards &amp; Streaming Work</span>
-        </div>
-        <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed max-w-3xl">
-          DiskDabba is calibrated to provide maximum free storage while keeping your infrastructure
-          costs safely locked under ₹300/month. File downloads use HTTP Range headers, allowing
-          direct video streaming with zero server overhead.
-        </p>
+      {showWithdrawModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-sky-100 bg-white p-6 sm:p-8 shadow-2xl">
+            <h3 className="text-xl font-bold text-slate-900 mb-1">
+              Request Creator Withdrawal
+            </h3>
+            <p className="text-xs text-slate-500 mb-6">
+              Enter your UPI ID or bank account details to cash out earnings.
+            </p>
 
-        <div className="mt-6 overflow-x-auto">
-          <table className="w-full text-left text-xs sm:text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-zinc-200 text-zinc-400 font-bold uppercase text-[11px] tracking-wider">
-                <th className="py-2.5 pr-4">Metric</th>
-                <th className="py-2.5 px-4">Threshold</th>
-                <th className="py-2.5 pl-4">Protection Policy</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100 text-zinc-700 font-medium">
-              <tr>
-                <td className="py-3 pr-4 font-bold text-zinc-900">Per-User Storage</td>
-                <td className="py-3 px-4 text-emerald-700 font-bold">5 GB Free</td>
-                <td className="py-3 pl-4 text-zinc-500">
-                  Allocated automatically upon registration
-                </td>
-              </tr>
-              <tr>
-                <td className="py-3 pr-4 font-bold text-zinc-900">Max Upload Size</td>
-                <td className="py-3 px-4 text-emerald-700 font-bold">100 MB / file</td>
-                <td className="py-3 pl-4 text-zinc-500">
-                  Direct presigned cryptographic PUT into Backblaze B2
-                </td>
-              </tr>
-              <tr>
-                <td className="py-3 pr-4 font-bold text-zinc-900">Monthly Budget</td>
-                <td className="py-3 px-4 text-emerald-700 font-bold">₹300 / mo Cap</td>
-                <td className="py-3 pl-4 text-zinc-500">
-                  Automated circuit breakers prevent unexpected overage
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            {withdrawMessage ? (
+              <div className="space-y-4">
+                <div className="rounded-2xl bg-sky-50 border border-sky-200 p-4 text-xs text-sky-900">
+                  <p className="font-bold">Notice</p>
+                  <p className="mt-1">{withdrawMessage}</p>
+                </div>
+                <button
+                  onClick={() => setShowWithdrawModal(false)}
+                  className="w-full rounded-full bg-slate-900 py-2.5 text-sm font-bold text-white"
+                >
+                  Close
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleWithdrawRequest} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
+                    Amount (INR) — Min ₹100
+                  </label>
+                  <input
+                    type="number"
+                    min="100"
+                    value={withdrawAmount}
+                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                    className="w-full rounded-2xl border border-slate-200 p-2.5 text-sm focus:border-sky-500 focus:outline-none"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
+                    Payout Method
+                  </label>
+                  <select
+                    value={withdrawMethod}
+                    onChange={(e) => setWithdrawMethod(e.target.value)}
+                    className="w-full rounded-2xl border border-slate-200 p-2.5 text-sm focus:border-sky-500 focus:outline-none"
+                  >
+                    <option value="UPI">UPI (Google Pay, PhonePe, Paytm)</option>
+                    <option value="BankTransfer">Direct Bank Transfer (NEFT/IMPS)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
+                    Payment Address / UPI ID
+                  </label>
+                  <input
+                    type="text"
+                    value={withdrawAddress}
+                    onChange={(e) => setWithdrawAddress(e.target.value)}
+                    placeholder="e.g. yourname@oksbi or account details"
+                    className="w-full rounded-2xl border border-slate-200 p-2.5 text-sm focus:border-sky-500 focus:outline-none"
+                    required
+                  />
+                </div>
+
+                <div className="pt-2 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowWithdrawModal(false)}
+                    className="flex-1 rounded-full border border-slate-200 py-2.5 text-sm font-bold text-slate-600"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={withdrawLoading}
+                    className="flex-1 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-500/25 disabled:opacity-50"
+                  >
+                    {withdrawLoading ? "Submitting..." : "Submit Request"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

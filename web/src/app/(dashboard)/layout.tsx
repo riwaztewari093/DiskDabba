@@ -1,6 +1,7 @@
 export const runtime = "edge";
 
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatBytes } from "@/lib/utils";
@@ -9,13 +10,12 @@ import {
   HardDrive,
   LogOut,
   Share2,
-  Trash2,
   BarChart3,
   UploadCloud,
   Shield,
-  Layers,
   Sparkles,
-  Menu,
+  Home,
+  Gift,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -53,33 +53,34 @@ export default async function DashboardLayout({
   const isAdmin = profile?.is_admin || false;
 
   return (
-    <div className="flex min-h-screen bg-zinc-50/70 text-zinc-900">
+    <div className="flex min-h-screen bg-[#fafcff] text-slate-900">
       {/* ============================================================ */}
-      {/* SIDEBAR NAVIGATION (Matching DiskWala Screenshot 2)          */}
+      {/* SIDEBAR NAVIGATION (Liquid Retina Sky-Blue Aesthetic)         */}
       {/* ============================================================ */}
-      <aside className="hidden w-64 flex-col border-r border-zinc-200/90 bg-white p-5 md:flex justify-between">
+      <aside className="hidden w-64 flex-col border-r border-sky-100 bg-white/90 p-5 md:flex justify-between backdrop-blur-xl">
         <div className="space-y-6">
-          {/* Brand Logo */}
-          <Link href="/dashboard" className="flex items-center gap-2.5 px-2 py-1 group">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-white font-extrabold shadow-sm group-hover:scale-105 transition-transform">
-              <Share2 className="h-4 w-4" />
-            </span>
-            <span className="text-xl font-black tracking-tight text-zinc-900">
-              d<span className="text-emerald-600 font-extrabold">i</span>sk
-              <span className="text-emerald-600 font-black">Dabba</span>
-            </span>
+          {/* Official Brand Logo */}
+          <Link href="/dashboard" className="flex items-center px-1 py-1 group">
+            <Image
+              src="/logo.jpg"
+              alt="DiskDabba"
+              width={160}
+              height={50}
+              priority
+              className="h-9 w-auto object-contain rounded-md"
+            />
           </Link>
 
-          {/* User Profile Card (Matching DiskWala user chip) */}
-          <div className="flex items-center gap-3 rounded-2xl bg-zinc-50 border border-zinc-200/80 p-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 font-bold text-sm shadow-xs border border-emerald-200">
+          {/* User Profile Card (Matching DiskWala creator chip) */}
+          <div className="flex items-center gap-3 rounded-2xl bg-sky-50/70 border border-sky-100 p-3 shadow-xs">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white font-bold text-sm shadow-sm">
               {displayName.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1 overflow-hidden">
-              <p className="truncate text-sm font-bold text-zinc-900 flex items-center gap-1">
+              <p className="truncate text-sm font-bold text-slate-900">
                 {displayName}
               </p>
-              <p className="truncate text-xs text-zinc-500 font-mono" title={email}>
+              <p className="truncate text-xs text-slate-500 font-mono" title={email}>
                 {email}
               </p>
             </div>
@@ -88,39 +89,39 @@ export default async function DashboardLayout({
           {/* Navigation Links Group */}
           <div className="space-y-4">
             <div>
-              <p className="px-2 text-[10px] font-extrabold uppercase tracking-widest text-zinc-400 mb-2">
-                Content
+              <p className="px-2 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">
+                Content & Revenue
               </p>
               <nav className="flex flex-col gap-1">
                 <Link
                   href="/dashboard"
-                  className="flex items-center gap-3 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm font-bold text-emerald-700 shadow-xs border border-emerald-100/80"
+                  className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-sky-50 to-blue-50/50 px-3.5 py-2.5 text-sm font-bold text-sky-700 shadow-xs border border-sky-200/70"
                 >
-                  <BarChart3 className="h-4 w-4 text-emerald-600" />
+                  <BarChart3 className="h-4 w-4 text-sky-600" />
                   <span>Analytics</span>
                 </Link>
 
                 <Link
                   href="/dashboard#upload"
-                  className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900"
+                  className="flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100/80 hover:text-slate-900"
                 >
-                  <UploadCloud className="h-4 w-4 text-zinc-500" />
+                  <UploadCloud className="h-4 w-4 text-slate-400" />
                   <span>Upload Files</span>
                 </Link>
 
                 <Link
                   href="/dashboard#files"
-                  className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900"
+                  className="flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100/80 hover:text-slate-900"
                 >
-                  <Folder className="h-4 w-4 text-zinc-500" />
+                  <Folder className="h-4 w-4 text-slate-400" />
                   <span>File Manager</span>
                 </Link>
 
                 <Link
                   href="/dashboard#shared"
-                  className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900"
+                  className="flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100/80 hover:text-slate-900"
                 >
-                  <Share2 className="h-4 w-4 text-zinc-500" />
+                  <Share2 className="h-4 w-4 text-slate-400" />
                   <span>Shared Links</span>
                 </Link>
               </nav>
@@ -128,15 +129,15 @@ export default async function DashboardLayout({
 
             {isAdmin && (
               <div>
-                <p className="px-2 text-[10px] font-extrabold uppercase tracking-widest text-zinc-400 mb-2">
-                  System
+                <p className="px-2 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">
+                  Administration
                 </p>
                 <nav className="flex flex-col gap-1">
                   <Link
                     href="/admin"
-                    className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-emerald-700 bg-emerald-50/50 border border-emerald-200/60 hover:bg-emerald-100/50 transition"
+                    className="flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-sky-800 bg-sky-50 border border-sky-200/80 hover:bg-sky-100/70 transition"
                   >
-                    <Shield className="h-4 w-4 text-emerald-600" />
+                    <Shield className="h-4 w-4 text-sky-600" />
                     <span>Cost Guard Admin</span>
                   </Link>
                 </nav>
@@ -146,40 +147,50 @@ export default async function DashboardLayout({
         </div>
 
         {/* Storage Quota & Sign Out at Bottom */}
-        <div className="space-y-4 pt-4 border-t border-zinc-100">
+        <div className="space-y-4 pt-4 border-t border-slate-100">
           {/* Storage Quota Widget */}
-          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              <span className="flex items-center gap-1.5 text-emerald-700">
+          <div className="rounded-2xl border border-sky-100 bg-slate-50/70 p-4">
+            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <span className="flex items-center gap-1.5 text-sky-700">
                 <HardDrive className="h-3.5 w-3.5" />
                 Storage
               </span>
-              <span className="font-mono text-zinc-700">{usagePercentage}%</span>
+              <span className="font-mono text-slate-700 font-bold">{usagePercentage}%</span>
             </div>
-            <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-zinc-200">
+            <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-slate-200">
               <div
-                className="h-full rounded-full bg-emerald-600 transition-all duration-300"
+                className="h-full rounded-full bg-gradient-to-r from-sky-500 to-blue-600 transition-all duration-300"
                 style={{ width: `${Math.max(usagePercentage, 2)}%` }}
               />
             </div>
-            <p className="mt-2 text-xs text-zinc-600">
-              <span className="font-semibold text-zinc-900">
+            <p className="mt-2 text-xs text-slate-600">
+              <span className="font-bold text-slate-900">
                 {formatBytes(storageUsed)}
               </span>{" "}
               used of {formatBytes(storageLimit)}
             </p>
           </div>
 
-          {/* Logout Action */}
-          <form action="/auth/signout" method="POST">
-            <button
-              type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white py-2.5 text-xs font-bold text-zinc-600 shadow-xs hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-colors"
+          {/* Links & Signout */}
+          <div className="flex gap-2">
+            <Link
+              href="/"
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white py-2 text-xs font-bold text-slate-600 hover:border-sky-300 hover:text-sky-600 transition"
             >
-              <LogOut className="h-3.5 w-3.5" />
-              <span>Logout</span>
-            </button>
-          </form>
+              <Home className="h-3.5 w-3.5" />
+              <span>Home</span>
+            </Link>
+
+            <form action="/auth/signout" method="POST" className="flex-1">
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white py-2 text-xs font-bold text-slate-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span>Logout</span>
+              </button>
+            </form>
+          </div>
         </div>
       </aside>
 
@@ -188,27 +199,28 @@ export default async function DashboardLayout({
       {/* ============================================================ */}
       <div className="flex flex-1 flex-col overflow-y-auto">
         {/* Mobile header */}
-        <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-4 py-3 md:hidden">
-          <Link href="/dashboard" className="flex items-center gap-2 text-lg font-black">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white text-xs">
-              <Share2 className="h-3.5 w-3.5" />
-            </span>
-            <span>
-              d<span className="text-emerald-600">i</span>sk
-              <span className="text-emerald-600">Dabba</span>
-            </span>
+        <header className="flex items-center justify-between border-b border-sky-100 bg-white/95 px-4 py-2.5 md:hidden backdrop-blur-md">
+          <Link href="/dashboard" className="flex items-center">
+            <Image
+              src="/logo.jpg"
+              alt="DiskDabba"
+              width={140}
+              height={45}
+              priority
+              className="h-7 w-auto object-contain rounded-md"
+            />
           </Link>
           <div className="flex items-center gap-2">
             <Link
               href="/"
-              className="text-xs font-semibold text-zinc-600 border border-zinc-200 rounded-lg px-2.5 py-1"
+              className="text-xs font-bold text-slate-600 border border-slate-200 rounded-full px-3 py-1"
             >
               Home
             </Link>
             <form action="/auth/signout" method="POST">
               <button
                 type="submit"
-                className="text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1"
+                className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-full px-3 py-1"
               >
                 Logout
               </button>

@@ -15,12 +15,28 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { fileId, filename, sizeBytes, s3Key, mimeType, sha256, folderId } =
-      body;
+    const {
+      fileId,
+      filename,
+      name,
+      sizeBytes,
+      size,
+      s3Key,
+      key,
+      mimeType,
+      sha256,
+      folderId,
+      visibility,
+    } = body;
 
-    if (!fileId || !filename || !sizeBytes || !s3Key) {
+    const resolvedFileId = fileId || crypto.randomUUID();
+    const resolvedName = filename || name;
+    const resolvedSize = sizeBytes || size;
+    const resolvedKey = s3Key || key;
+
+    if (!resolvedFileId || !resolvedName || !resolvedSize || !resolvedKey) {
       return NextResponse.json(
-        { error: "Missing required file metadata" },
+        { error: "Missing required file metadata (fileId, name, size, s3Key)" },
         { status: 400 }
       );
     }
@@ -29,14 +45,15 @@ export async function POST(request: Request) {
     const { data: file, error: fileError } = await supabase
       .from("files")
       .insert({
-        id: fileId,
+        id: resolvedFileId,
         user_id: user.id,
         folder_id: folderId || null,
-        name: filename,
+        name: resolvedName,
         mime_type: mimeType || "application/octet-stream",
-        size: sizeBytes,
-        r2_key: s3Key,
+        size: resolvedSize,
+        r2_key: resolvedKey,
         sha256: sha256 || null,
+        visibility: visibility || "public",
       })
       .select()
       .single();
@@ -55,10 +72,24 @@ export async function POST(request: Request) {
     const currentUsed = profile?.storage_used ?? 0;
     await supabase
       .from("profiles")
-      .update({ storage_used: currentUsed + sizeBytes })
+      .update({ storage_used: currentUsed + resolvedSize })
       .eq("id", user.id);
 
-    return NextResponse.json({ success: true, file });
+    // 3. Create default share link for instant sharing
+    const shareToken = resolvedFileId.replace(/-/g, "").substring(0, 16);
+    await supabase.from("shares").insert({
+      file_id: resolvedFileId,
+      created_by: user.id,
+      token: shareToken,
+      permission: "view",
+    });
+
+    return NextResponse.json({
+      success: true,
+      file,
+      shareUrl: `/app/${resolvedFileId}`,
+      shareToken,
+    });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Internal Server Error";
     return NextResponse.json({ error: message }, { status: 500 });

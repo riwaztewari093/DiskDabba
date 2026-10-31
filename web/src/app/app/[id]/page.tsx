@@ -3,22 +3,25 @@
 export const runtime = "edge";
 
 import { use, useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
-  Share2,
   FileVideo,
   FileText,
   FileArchive,
   FileAudio,
   File,
   Play,
+  Pause,
   Download,
   Copy,
   Check,
   ShieldCheck,
-  ExternalLink,
   ArrowLeft,
   Sparkles,
+  Eye,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 
 interface SharedFileDetails {
@@ -43,6 +46,7 @@ export default function SharedAppPage({
   const [copied, setCopied] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [fileDetails, setFileDetails] = useState<SharedFileDetails>({
     id: fileId,
     name: `@Ha**m**Go*t*d*026*2****63*4***05***4`,
@@ -53,26 +57,42 @@ export default function SharedAppPage({
   });
 
   useEffect(() => {
-    // Attempt to fetch real file details from our download/signed-url API
     async function loadFileInfo() {
       try {
-        const res = await fetch(`/api/download/signed-url?fileId=${fileId}`);
+        // Try public share endpoint first
+        let res = await fetch(`/api/share/${fileId}`);
+        if (!res.ok) {
+          // Fall back to download signed-url endpoint
+          res = await fetch(`/api/download/signed-url?fileId=${fileId}`);
+        }
+
         if (res.ok) {
           const data = await res.json();
-          const isVid = data.name?.match(/\.(mp4|webm|mkv|mov|avi)$/i) || data.mimeType?.startsWith("video/");
+          const isVid =
+            data.name?.match(/\.(mp4|webm|mkv|mov|avi|m4v)$/i) ||
+            data.mimeType?.startsWith("video/");
+
+          const formatBytes = (bytes: number) => {
+            if (bytes === 0) return "0 Bytes";
+            const k = 1024;
+            const sizes = ["Bytes", "KB", "MB", "GB"];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+          };
+
           setFileDetails({
-            id: fileId,
-            name: data.name || `@Ha**m**Go*t*d*026*2****63*4***05***4`,
+            id: data.id || fileId,
+            name: data.name || data.filename || `@Ha**m**Go*t*d*026*2****63*4***05***4`,
             mimeType: data.mimeType || "video/mp4",
-            sizeFormatted: data.sizeFormatted || "9.82 MB",
-            sizeBytes: data.size || 10297000,
+            sizeFormatted: formatBytes(data.sizeBytes || data.size || 10297000),
+            sizeBytes: data.sizeBytes || data.size || 10297000,
             isVideo: !!isVid,
             downloadUrl: data.downloadUrl,
-            streamUrl: data.downloadUrl,
+            streamUrl: data.streamUrl || data.downloadUrl,
           });
         }
       } catch {
-        // Fall back to clean default demo details if ad-hoc ID
+        // Fall back to demo details if file not found
       } finally {
         setLoading(false);
       }
@@ -93,132 +113,168 @@ export default function SharedAppPage({
     if (fileDetails.downloadUrl) {
       window.open(fileDetails.downloadUrl, "_blank");
     } else {
-      // Trigger browser notification for demo
-      alert("Download starting for: " + fileDetails.name);
+      alert("Download is ready for: " + fileDetails.name);
     }
   };
 
+  const getFileIcon = () => {
+    if (fileDetails.isVideo) return <FileVideo className="h-10 w-10 text-sky-500" />;
+    if (fileDetails.mimeType?.includes("audio"))
+      return <FileAudio className="h-10 w-10 text-violet-500" />;
+    if (fileDetails.mimeType?.includes("zip") || fileDetails.mimeType?.includes("rar"))
+      return <FileArchive className="h-10 w-10 text-amber-500" />;
+    if (fileDetails.mimeType?.includes("pdf") || fileDetails.mimeType?.includes("text"))
+      return <FileText className="h-10 w-10 text-blue-500" />;
+    return <File className="h-10 w-10 text-slate-500" />;
+  };
+
   return (
-    <div className="min-h-screen bg-zinc-50/60 text-zinc-900 flex flex-col justify-between selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="relative min-h-screen flex flex-col justify-between bg-[#fafcff] text-slate-900 selection:bg-sky-100 selection:text-sky-900">
+      {/* Liquid Retina Ambient Glow */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="absolute -top-32 right-1/4 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-sky-400/15 via-blue-500/10 to-transparent blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 h-[500px] w-[500px] rounded-full bg-gradient-to-tr from-cyan-400/15 via-sky-300/10 to-transparent blur-3xl" />
+      </div>
+
       {/* ============================================================ */}
       {/* FLOATING NAVBAR                                              */}
       {/* ============================================================ */}
       <header className="fixed top-4 inset-x-0 z-50 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-        <nav className="flex items-center justify-between rounded-full border border-emerald-100/90 bg-white/95 px-5 py-2.5 shadow-md shadow-emerald-900/5 backdrop-blur-md">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 text-xl font-black tracking-tight group">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white font-extrabold shadow-sm group-hover:scale-105 transition-transform">
-              <Share2 className="h-4 w-4" />
-            </span>
-            <span className="text-zinc-900">
-              d<span className="text-emerald-600 font-extrabold">i</span>sk
-              <span className="text-emerald-600 font-black">Dabba</span>
-            </span>
+        <nav className="flex items-center justify-between rounded-full border border-sky-100/90 bg-white/90 px-4 sm:px-6 py-2 shadow-[0_8px_30px_rgb(14,165,233,0.08)] backdrop-blur-xl">
+          <Link href="/" className="flex items-center gap-2 group transition-transform hover:scale-[1.02]">
+            <Image
+              src="/logo.jpg"
+              alt="DiskDabba"
+              width={150}
+              height={50}
+              priority
+              className="h-8 w-auto object-contain rounded-md"
+            />
           </Link>
 
-          {/* Action link */}
           <div className="flex items-center gap-3">
             <Link
-              href="/signup"
-              className="flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-1.5 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-emerald-700 transition"
+              href="/"
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-sky-600 transition"
             >
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>Get 5 GB Free</span>
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span>Back Home</span>
+            </Link>
+            <Link
+              href="/signup"
+              className="rounded-full bg-gradient-to-r from-sky-500 via-sky-600 to-blue-600 px-4 sm:px-5 py-1.5 text-xs sm:text-sm font-bold text-white shadow-sm shadow-sky-500/25 hover:from-sky-400 hover:to-blue-500 transition"
+            >
+              Upload Your Files
             </Link>
           </div>
         </nav>
       </header>
 
       {/* ============================================================ */}
-      {/* MAIN SHARED FILE CARD (Matching DiskWala Screenshot 1)        */}
+      {/* MAIN SHARED VIEWER CARD (Matching DiskWala Screenshot 1)      */}
       {/* ============================================================ */}
-      <main className="flex-1 flex flex-col items-center justify-center pt-28 pb-16 px-4 sm:px-6">
-        <div className="w-full max-w-lg bg-white rounded-3xl border border-zinc-200/90 p-6 sm:p-10 shadow-xl shadow-zinc-200/50 text-center relative overflow-hidden">
-          {/* Top highlight bar */}
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-400 via-emerald-600 to-emerald-500" />
-
+      <main className="relative z-10 flex-1 flex items-center justify-center px-4 pt-28 pb-16">
+        <div className="w-full max-w-lg rounded-3xl border border-sky-100/90 bg-white/90 p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(14,165,233,0.12)] backdrop-blur-2xl text-center space-y-6">
           {/* Shared File Pill Tag */}
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-3.5 py-1 text-xs font-semibold text-emerald-800 mb-6 shadow-xs">
-            <Share2 className="h-3.5 w-3.5 text-emerald-600" />
-            Shared File
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 px-4 py-1.5 text-xs font-bold text-sky-700">
+            <FileVideo className="h-3.5 w-3.5 text-sky-600" />
+            <span>Shared File</span>
           </div>
 
-          {/* Large Circular Media Icon */}
-          <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-emerald-100/80 text-emerald-600 mb-6 shadow-inner transition-transform hover:scale-105">
-            {fileDetails.isVideo ? (
-              <FileVideo className="h-11 w-11 text-emerald-600 fill-emerald-600/10" />
-            ) : (
-              <FileText className="h-11 w-11 text-emerald-600" />
-            )}
-          </div>
-
-          {/* Title */}
-          <h1 className="text-lg sm:text-xl font-bold text-zinc-900 tracking-tight font-mono break-all px-2">
-            {fileDetails.name}
-          </h1>
-
-          {/* Meta Badges */}
-          <div className="mt-3.5 flex items-center justify-center gap-2.5">
-            <span className="rounded-full bg-zinc-100 border border-zinc-200/60 px-3 py-1 text-xs font-semibold text-zinc-600">
-              {fileDetails.mimeType}
-            </span>
-            <span className="rounded-full bg-zinc-100 border border-zinc-200/60 px-3 py-1 text-xs font-semibold text-zinc-600">
-              {fileDetails.sizeFormatted}
-            </span>
-          </div>
-
-          {/* Built-in Video Player (Opens on click) */}
-          {isPlaying && (
-            <div className="mt-6 rounded-2xl overflow-hidden border border-zinc-200 bg-black aspect-video flex items-center justify-center shadow-md animate-in fade-in zoom-in-95 duration-200">
-              {fileDetails.streamUrl ? (
-                <video
-                  src={fileDetails.streamUrl}
-                  controls
-                  autoPlay
-                  playsInline
-                  className="w-full h-full object-contain"
-                />
+          {/* Media Player or Large Icon */}
+          {isPlaying && fileDetails.isVideo && fileDetails.streamUrl ? (
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-black border border-slate-800">
+              <video
+                src={fileDetails.streamUrl}
+                controls
+                autoPlay
+                playsInline
+                className="w-full aspect-video rounded-2xl bg-black"
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          ) : (
+            <div
+              onClick={() => {
+                if (fileDetails.isVideo) setIsPlaying(true);
+              }}
+              className="mx-auto flex h-24 w-24 cursor-pointer items-center justify-center rounded-full bg-gradient-to-tr from-sky-100 to-sky-50 text-sky-600 shadow-inner border border-sky-200/80 hover:scale-105 transition-all duration-300 group"
+            >
+              {fileDetails.isVideo ? (
+                <Play className="h-10 w-10 fill-sky-600 text-sky-600 translate-x-0.5 group-hover:scale-110 transition-transform" />
               ) : (
-                <div className="text-center p-6 text-zinc-400">
-                  <Play className="h-10 w-10 text-emerald-500 mx-auto mb-2 opacity-80" />
-                  <p className="text-sm font-medium text-white">Streaming Video Player</p>
-                  <p className="text-xs text-zinc-400 mt-1">
-                    Direct byte-range streaming via Backblaze B2 Vault
-                  </p>
-                </div>
+                getFileIcon()
               )}
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="mt-8 flex flex-col gap-3">
-            <button
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="w-full flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] py-3.5 text-base font-bold text-white shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
+          {/* File Name & Metadata */}
+          <div>
+            <h1
+              className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight break-all font-mono"
+              title={fileDetails.name}
             >
-              <Play className="h-4 w-4 fill-white" />
-              {isPlaying ? "Close Video Player" : "View & Stream in Player"}
-            </button>
+              {fileDetails.name}
+            </h1>
+            <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 border border-slate-200/60">
+                {fileDetails.mimeType}
+              </span>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 border border-slate-200/60">
+                {fileDetails.sizeFormatted}
+              </span>
+              <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 border border-sky-200/60 flex items-center gap-1">
+                <ShieldCheck className="h-3.5 w-3.5 text-sky-600" />
+                <span>Verified Cloud Vault</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Action Buttons: Play & Download */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            {fileDetails.isVideo && (
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-500 via-sky-600 to-blue-600 py-3.5 px-5 text-sm font-bold text-white shadow-md shadow-sky-500/25 transition-all hover:from-sky-400 hover:to-blue-500 hover:shadow-lg hover:shadow-sky-500/35 active:scale-[0.98]"
+              >
+                {isPlaying ? (
+                  <>
+                    <Pause className="h-4 w-4" />
+                    <span>Pause Video</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4 fill-white" />
+                    <span>View in Player</span>
+                  </>
+                )}
+              </button>
+            )}
 
             <button
               onClick={handleDownload}
-              className="w-full flex items-center justify-center gap-2 rounded-2xl border border-zinc-300 bg-white hover:bg-zinc-50 active:scale-[0.99] py-3.5 text-base font-semibold text-zinc-700 shadow-xs transition-all cursor-pointer"
+              className={`flex-1 inline-flex items-center justify-center gap-2 rounded-2xl py-3.5 px-5 text-sm font-bold transition-all active:scale-[0.98] ${
+                !fileDetails.isVideo
+                  ? "bg-gradient-to-r from-sky-500 via-sky-600 to-blue-600 text-white shadow-md shadow-sky-500/25 hover:from-sky-400 hover:to-blue-500 hover:shadow-lg"
+                  : "border border-slate-200/90 bg-slate-50 text-slate-800 hover:bg-white hover:border-sky-300 hover:shadow-sm"
+              }`}
             >
-              <Download className="h-4 w-4 text-zinc-600" />
-              Download File
+              <Download className="h-4 w-4" />
+              <span>Download File</span>
             </button>
           </div>
 
-          {/* Copy link to open in browser */}
-          <div className="mt-5">
+          {/* Copy Share Link */}
+          <div className="pt-2">
             <button
               onClick={handleCopyLink}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-zinc-500 hover:text-emerald-600 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-sky-600 transition"
             >
               {copied ? (
                 <>
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span className="text-emerald-600 font-semibold">Link copied to clipboard!</span>
+                  <Check className="h-4 w-4 text-sky-600" />
+                  <span className="text-sky-600 font-bold">Share link copied!</span>
                 </>
               ) : (
                 <>
@@ -228,36 +284,14 @@ export default function SharedAppPage({
               )}
             </button>
           </div>
-
-          {/* Trust footnote */}
-          <div className="mt-8 pt-5 border-t border-zinc-100 flex items-center justify-center gap-2 text-xs text-zinc-400">
-            <ShieldCheck className="h-4 w-4 text-emerald-600" />
-            <span>Encrypted cloud storage hosted on DiskDabba</span>
-          </div>
-        </div>
-
-        {/* Bottom promo */}
-        <div className="mt-6 text-center">
-          <Link
-            href="/signup"
-            className="text-xs sm:text-sm font-medium text-zinc-500 hover:text-emerald-700 transition"
-          >
-            Want to share your own videos and files?{" "}
-            <span className="text-emerald-600 font-semibold underline underline-offset-4">
-              Get free 5 GB storage &rarr;
-            </span>
-          </Link>
         </div>
       </main>
 
       {/* ============================================================ */}
-      {/* FOOTER                                                       */}
+      {/* COMPACT FOOTER                                               */}
       {/* ============================================================ */}
-      <footer className="py-6 border-t border-zinc-200/80 bg-white text-center text-xs text-zinc-400">
-        <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
-          <span className="font-semibold text-zinc-600">DiskDabba Vault</span>
-          <span>&copy; {new Date().getFullYear()} DiskDabba. All rights reserved.</span>
-        </div>
+      <footer className="relative z-10 border-t border-sky-100 bg-white/70 py-6 text-center text-xs text-slate-400 backdrop-blur-md">
+        <p>Powered by DiskDabba Cloud Vault • High-Speed Encrypted CDN</p>
       </footer>
     </div>
   );

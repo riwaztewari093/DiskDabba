@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   UploadCloud,
   ShieldCheck,
   Zap,
-  Globe2,
   HardDrive,
   Share2,
   Play,
@@ -18,10 +18,13 @@ import {
   X,
   FileVideo,
   Lock,
-  Layers,
   Sparkles,
-  Server,
   ArrowRight,
+  TrendingUp,
+  Wallet,
+  Smartphone,
+  Eye,
+  CheckCircle2,
 } from "lucide-react";
 
 export default function Home() {
@@ -30,9 +33,11 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const handleCopyDemo = () => {
-    navigator.clipboard.writeText("https://diskdabba.pages.dev/app/sample-demo-file");
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(`${window.location.origin}/app/6ae2b93ddfc8e29e5138c277`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const toggleFaq = (idx: number) => {
@@ -40,35 +45,48 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900 selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#fafcff] text-slate-900">
       {/* ============================================================ */}
-      {/* FLOATING NAVBAR                                              */}
+      {/* LIQUID RETINA AMBIENT GLOW BACKDROPS                          */}
+      {/* ============================================================ */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="absolute -top-40 right-1/4 h-[550px] w-[550px] rounded-full bg-gradient-to-br from-sky-400/15 via-blue-500/10 to-transparent blur-3xl" />
+        <div className="absolute top-1/3 -left-40 h-[600px] w-[600px] rounded-full bg-gradient-to-tr from-sky-300/15 via-cyan-400/10 to-transparent blur-3xl" />
+        <div className="absolute -bottom-40 right-10 h-[500px] w-[500px] rounded-full bg-gradient-to-tl from-blue-600/10 via-sky-400/10 to-transparent blur-3xl" />
+      </div>
+
+      {/* ============================================================ */}
+      {/* FLOATING GLASS NAVBAR                                         */}
       {/* ============================================================ */}
       <header className="fixed top-4 inset-x-0 z-50 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <nav className="flex items-center justify-between rounded-full border border-emerald-100/80 bg-white/95 px-5 py-2.5 shadow-lg shadow-emerald-900/5 backdrop-blur-md">
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2 text-xl font-black tracking-tight group">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-white font-extrabold shadow-sm group-hover:scale-105 transition-transform">
-              <Share2 className="h-4 w-4" />
-            </span>
-            <span className="text-zinc-900">
-              d<span className="text-emerald-600 font-extrabold">i</span>sk
-              <span className="text-emerald-600 font-black">Dabba</span>
-            </span>
+        <nav className="flex items-center justify-between rounded-full border border-sky-100/80 bg-white/85 px-4 sm:px-6 py-2 shadow-[0_8px_30px_rgb(14,165,233,0.08)] backdrop-blur-xl transition-all">
+          {/* Official Brand Logo */}
+          <Link href="/" className="flex items-center gap-2 group transition-transform hover:scale-[1.02]">
+            <Image
+              src="/logo.jpg"
+              alt="DiskDabba — Store • Stream • Share"
+              width={165}
+              height={55}
+              priority
+              className="h-8 sm:h-9 w-auto object-contain rounded-md"
+            />
           </Link>
 
-          {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-zinc-600">
-            <a href="#features" className="hover:text-emerald-600 transition-colors">
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-600">
+            <a href="#features" className="hover:text-sky-600 transition-colors">
               Features
             </a>
-            <a href="#how-it-works" className="hover:text-emerald-600 transition-colors">
+            <a href="#how-it-works" className="hover:text-sky-600 transition-colors">
               How It Works
             </a>
-            <a href="#preview" className="hover:text-emerald-600 transition-colors">
-              Share Experience
+            <a href="#rates" className="hover:text-sky-600 transition-colors">
+              Publisher Rates
             </a>
-            <a href="#faq" className="hover:text-emerald-600 transition-colors">
+            <a href="#preview" className="hover:text-sky-600 transition-colors">
+              Shared Viewer
+            </a>
+            <a href="#faq" className="hover:text-sky-600 transition-colors">
               FAQ
             </a>
           </div>
@@ -77,22 +95,23 @@ export default function Home() {
           <div className="hidden md:flex items-center gap-3">
             <Link
               href="/login"
-              className="text-sm font-semibold text-zinc-700 hover:text-emerald-600 px-4 py-2 transition-colors"
+              className="text-sm font-semibold text-slate-700 hover:text-sky-600 px-4 py-2 transition-colors"
             >
-              Sign In
+              Log In
             </Link>
             <Link
               href="/signup"
-              className="flex items-center gap-1.5 rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 hover:shadow transition-all"
+              className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-sky-500 via-sky-600 to-blue-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-sky-500/25 transition-all duration-300 hover:from-sky-400 hover:to-blue-500 hover:shadow-lg hover:shadow-sky-500/40 hover:-translate-y-0.5 active:translate-y-0"
             >
-              Join Us
+              <span>Join Free</span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="flex md:hidden p-2 text-zinc-600 hover:text-zinc-900 focus:outline-none"
+            className="flex lg:hidden p-2 text-slate-700 hover:text-sky-600 focus:outline-none"
             aria-label="Toggle Menu"
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -101,48 +120,54 @@ export default function Home() {
 
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
-          <div className="mt-2 flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl md:hidden animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="mt-2 flex flex-col gap-3 rounded-3xl border border-sky-100 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl lg:hidden animate-in fade-in slide-in-from-top-3 duration-200">
             <a
               href="#features"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-base font-medium text-zinc-700 hover:text-emerald-600 py-1"
+              className="text-base font-semibold text-slate-800 hover:text-sky-600 py-1"
             >
               Features
             </a>
             <a
               href="#how-it-works"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-base font-medium text-zinc-700 hover:text-emerald-600 py-1"
+              className="text-base font-semibold text-slate-800 hover:text-sky-600 py-1"
             >
               How It Works
             </a>
             <a
+              href="#rates"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-base font-semibold text-slate-800 hover:text-sky-600 py-1"
+            >
+              Publisher Rates
+            </a>
+            <a
               href="#preview"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-base font-medium text-zinc-700 hover:text-emerald-600 py-1"
+              className="text-base font-semibold text-slate-800 hover:text-sky-600 py-1"
             >
-              Share Experience
+              Shared Viewer
             </a>
             <a
               href="#faq"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-base font-medium text-zinc-700 hover:text-emerald-600 py-1"
+              className="text-base font-semibold text-slate-800 hover:text-sky-600 py-1"
             >
               FAQ
             </a>
-            <hr className="border-zinc-100 my-1" />
-            <div className="flex flex-col gap-2 pt-1">
+            <div className="pt-3 border-t border-slate-100 flex flex-col gap-2.5">
               <Link
                 href="/login"
-                className="w-full text-center py-2.5 text-sm font-semibold text-zinc-700 rounded-xl hover:bg-zinc-50"
+                className="w-full text-center py-2.5 rounded-full border border-slate-200 text-sm font-bold text-slate-700"
               >
-                Sign In
+                Log In
               </Link>
               <Link
                 href="/signup"
-                className="w-full text-center py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm"
+                className="w-full text-center py-2.5 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 text-sm font-bold text-white shadow-md shadow-sky-500/25"
               >
-                Join Us — Free
+                Join Free
               </Link>
             </div>
           </div>
@@ -152,148 +177,148 @@ export default function Home() {
       {/* ============================================================ */}
       {/* HERO SECTION                                                 */}
       {/* ============================================================ */}
-      <section className="relative pt-36 pb-20 md:pt-44 md:pb-28 overflow-hidden bg-gradient-to-b from-emerald-50/70 via-white to-white">
-        {/* Soft background aura */}
-        <div className="absolute top-12 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-emerald-200/30 blur-[100px] pointer-events-none rounded-full" />
+      <section className="relative z-10 pt-32 pb-20 sm:pt-40 sm:pb-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        {/* Pill Tag */}
+        <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50/80 px-4 py-1.5 text-xs sm:text-sm font-bold text-sky-800 shadow-sm backdrop-blur-md mb-8">
+          <Sparkles className="h-4 w-4 text-sky-600 animate-pulse" />
+          <span>Next-Gen Cloud Storage & Monetized Streaming</span>
+        </div>
 
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
-          {/* Top Pill Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50/80 px-4 py-1.5 text-xs sm:text-sm font-semibold text-emerald-800 shadow-sm mb-6">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            Upload, Share &amp; Vault Your Content
+        {/* Hero Title */}
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 leading-[1.1] max-w-4xl mx-auto">
+          Upload, Share &{" "}
+          <span className="bg-gradient-to-r from-sky-500 via-sky-600 to-blue-600 bg-clip-text text-transparent">
+            Monetize
+          </span>{" "}
+          Your Content
+        </h1>
+
+        {/* Subtitle */}
+        <p className="mt-6 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal">
+          Creators upload high-speed files & videos to our secure cloud vault. Viewers
+          enjoy buffer-free Liquid Retina playback anywhere. Monetization starts from the 1st view.
+        </p>
+
+        {/* CTA Buttons */}
+        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link
+            href="/signup"
+            className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-sky-500 via-sky-600 to-blue-600 px-8 py-4 text-base font-bold text-white shadow-xl shadow-sky-500/30 transition-all duration-300 hover:from-sky-400 hover:to-blue-500 hover:shadow-2xl hover:shadow-sky-500/40 hover:-translate-y-1 active:translate-y-0"
+          >
+            <UploadCloud className="h-5 w-5" />
+            <span>Start Uploading — Free</span>
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
+
+          <Link
+            href="/app/6ae2b93ddfc8e29e5138c277"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white/90 px-7 py-4 text-base font-bold text-slate-800 shadow-sm backdrop-blur-md transition-all duration-300 hover:bg-white hover:border-sky-300 hover:shadow-md hover:-translate-y-0.5"
+          >
+            <Play className="h-4 w-4 text-sky-600 fill-sky-600" />
+            <span>Try Shared Player Demo</span>
+          </Link>
+        </div>
+
+        {/* Highlights Row */}
+        <div className="mt-14 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs sm:text-sm font-semibold text-slate-600">
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-sky-100 text-sky-700">
+              <Check className="h-3.5 w-3.5" />
+            </span>
+            <span>Unlimited Cloud Storage</span>
           </div>
-
-          {/* Bold Headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-zinc-950 max-w-4xl leading-[1.12]">
-            Upload, Share &amp;{" "}
-            <span className="text-emerald-600 underline decoration-emerald-300 decoration-wavy decoration-2 underline-offset-8">
-              Monetize
-            </span>{" "}
-            Your Content
-          </h1>
-
-          {/* Subheading */}
-          <p className="mt-6 text-lg sm:text-xl text-zinc-600 max-w-2xl leading-relaxed">
-            Creators upload files via our high-speed Web Dashboard. Viewers access them
-            through lightweight, lightning-fast shareable links with zero buffering.
-          </p>
-
-          {/* Primary Action Buttons */}
-          <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-            <Link
-              href="/signup"
-              className="flex w-full sm:w-auto items-center justify-center gap-2.5 rounded-full bg-emerald-600 px-8 py-3.5 text-base font-bold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 hover:shadow-emerald-600/30 transition-all hover:-translate-y-0.5"
-            >
-              <UploadCloud className="h-5 w-5" />
-              Start Uploading — Free
-            </Link>
-            <a
-              href="#preview"
-              className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-8 py-3.5 text-base font-semibold text-zinc-700 hover:border-zinc-400 hover:bg-zinc-50 transition-all"
-            >
-              View Shared Demo
-            </a>
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-sky-100 text-sky-700">
+              <Check className="h-3.5 w-3.5" />
+            </span>
+            <span>Real-time Live View Count</span>
           </div>
-
-          <p className="mt-4 text-xs text-zinc-400">
-            Free 5 GB storage • No credit card required • Production Backblaze B2 Vault
-          </p>
-
-          {/* Highlighted Feature Badges Row (Inspired by DiskWala) */}
-          <div className="mt-14 flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-medium text-zinc-700">
-            <div className="flex items-center gap-1.5 rounded-full bg-white border border-zinc-200 px-3.5 py-1.5 shadow-xs">
-              <Zap className="h-4 w-4 text-emerald-600" />
-              <span>Direct S3 Uploads</span>
-            </div>
-            <div className="flex items-center gap-1.5 rounded-full bg-white border border-zinc-200 px-3.5 py-1.5 shadow-xs">
-              <Globe2 className="h-4 w-4 text-emerald-600" />
-              <span>Global Cloudflare Edge</span>
-            </div>
-            <div className="flex items-center gap-1.5 rounded-full bg-white border border-zinc-200 px-3.5 py-1.5 shadow-xs">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
-              <span>Auto ₹300 Budget Cap</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-sky-100 text-sky-700">
+              <Check className="h-3.5 w-3.5" />
+            </span>
+            <span>Fast Global Payouts (UPI, Bank)</span>
           </div>
         </div>
       </section>
 
       {/* ============================================================ */}
-      {/* LIVE SHARED LINK PREVIEW (Directly matching DiskWala app view) */}
+      {/* INTERACTIVE DEMO CARD (Matching DiskWala Screenshot 1)        */}
       {/* ============================================================ */}
-      <section id="preview" className="py-16 bg-zinc-50 border-y border-zinc-200/80">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 uppercase tracking-wider mb-2">
-            <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
-            Viewer Experience
+      <section id="preview" className="relative z-10 py-12 max-w-5xl mx-auto px-4 sm:px-6">
+        <div className="rounded-3xl border border-sky-100/90 bg-white/80 p-6 sm:p-10 shadow-[0_20px_60px_-15px_rgba(14,165,233,0.12)] backdrop-blur-2xl">
+          <div className="text-center mb-8">
+            <span className="text-xs font-bold uppercase tracking-widest text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
+              Shared File Experience
+            </span>
+            <h2 className="mt-3 text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              What your audience sees when you share
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">
+              Clean, distraction-free player optimized for mobile and desktop screens.
+            </p>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900">
-            How Your Shared Links Look to Users
-          </h2>
-          <p className="mt-2 text-sm sm:text-base text-zinc-600 max-w-xl mx-auto">
-            When you share a video or file, your recipients get this clean, distraction-free
-            player card that opens instantly on mobile &amp; desktop.
-          </p>
 
-          {/* Centered Preview Card */}
-          <div className="mt-10 mx-auto max-w-md bg-white rounded-3xl border border-zinc-200 p-6 sm:p-8 shadow-xl shadow-zinc-200/50 text-center">
-            {/* Tag */}
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-700 mb-6">
-              <Share2 className="h-3.5 w-3.5" />
-              Shared File
+          {/* The DiskWala-style card */}
+          <div className="max-w-md mx-auto rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-lg shadow-slate-200/50 text-center space-y-6">
+            {/* Pill Tag */}
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 px-3.5 py-1 text-xs font-bold text-sky-700">
+              <FileVideo className="h-3.5 w-3.5" />
+              <span>Shared File</span>
             </div>
 
-            {/* Circular Media Icon */}
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100/70 text-emerald-600 mb-6 group cursor-pointer hover:scale-105 transition-transform">
-              <FileVideo className="h-9 w-9 text-emerald-600 fill-emerald-600/10" />
+            {/* Media Icon */}
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-sky-100/70 text-sky-600 shadow-inner">
+              <Play className="h-9 w-9 fill-sky-600 translate-x-0.5" />
             </div>
 
-            {/* File Title */}
-            <h3 className="text-base sm:text-lg font-bold text-zinc-900 tracking-tight font-mono">
-              @Ha**m**Go*t*d*026*2****63*4***05***4
-            </h3>
-
-            {/* Meta tags */}
-            <div className="mt-3 flex items-center justify-center gap-2">
-              <span className="rounded-full bg-zinc-100 px-3 py-0.5 text-xs font-semibold text-zinc-600">
-                video/mp4
-              </span>
-              <span className="rounded-full bg-zinc-100 px-3 py-0.5 text-xs font-semibold text-zinc-600">
-                9.82 MB
-              </span>
+            {/* Title & Metadata */}
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 font-mono tracking-tight truncate">
+                @Ha**m**Go*t*d*026*2****63*4***05***4
+              </h3>
+              <div className="mt-2 flex items-center justify-center gap-2">
+                <span className="rounded-full bg-slate-100 px-3 py-0.5 text-xs font-semibold text-slate-600">
+                  video/mp4
+                </span>
+                <span className="rounded-full bg-slate-100 px-3 py-0.5 text-xs font-semibold text-slate-600">
+                  9.82 MB
+                </span>
+              </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="mt-6 flex flex-col gap-2.5">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link
-                href="/login"
-                className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition"
+                href="/app/6ae2b93ddfc8e29e5138c277"
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 py-3 text-sm font-bold text-white shadow-md shadow-sky-500/25 transition hover:shadow-lg hover:from-sky-400 hover:to-blue-500"
               >
                 <Play className="h-4 w-4 fill-white" />
-                View &amp; Stream Now
+                <span>Play Video</span>
               </Link>
               <Link
-                href="/login"
-                className="flex items-center justify-center gap-2 rounded-xl border border-zinc-300 py-3 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition"
+                href="/app/6ae2b93ddfc8e29e5138c277"
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50/80 py-3 text-sm font-bold text-slate-700 transition hover:bg-white hover:border-slate-300"
               >
-                <Download className="h-4 w-4 text-zinc-600" />
-                Download File
+                <Download className="h-4 w-4 text-slate-600" />
+                <span>Download</span>
               </Link>
             </div>
 
-            {/* Copy Link helper */}
+            {/* Copy Link Row */}
             <button
               onClick={handleCopyDemo}
-              className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-emerald-600 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-sky-600 transition"
             >
               {copied ? (
                 <>
-                  <Check className="h-3.5 w-3.5 text-emerald-600" />
-                  <span className="text-emerald-600 font-semibold">Link Copied to Clipboard!</span>
+                  <Check className="h-3.5 w-3.5 text-sky-600" />
+                  <span className="text-sky-600">Link copied to clipboard!</span>
                 </>
               ) : (
                 <>
                   <Copy className="h-3.5 w-3.5" />
-                  <span>Copy link to open in browser</span>
+                  <span>Copy share link to open in browser</span>
                 </>
               )}
             </button>
@@ -302,266 +327,297 @@ export default function Home() {
       </section>
 
       {/* ============================================================ */}
-      {/* ENTERPRISE TRUST & INFRASTRUCTURE                            */}
+      {/* FEATURES GRID                                                */}
       {/* ============================================================ */}
-      <section className="py-16 bg-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-xs font-extrabold uppercase tracking-widest text-emerald-600 mb-2">
-            Cloud Infrastructure Architecture
-          </p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900">
-            Powered by Enterprise Cloud Giants
+      <section id="features" className="relative z-10 py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-xs font-bold uppercase tracking-widest text-sky-600 bg-sky-50 px-3.5 py-1 rounded-full border border-sky-200">
+            Engineered For Creators
+          </span>
+          <h2 className="mt-4 text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+            Built for maximum speed, security and earnings
           </h2>
-          <p className="mt-2 text-sm sm:text-base text-zinc-600 max-w-xl mx-auto">
-            Your files never pass through intermediate servers. They stream directly to and from
-            high-durability object vaults.
+          <p className="mt-3 text-base sm:text-lg text-slate-600">
+            DiskDabba combines cloud infrastructure with high-performance video delivery.
           </p>
-
-          <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            <div className="flex flex-col items-center justify-center p-6 rounded-2xl border border-zinc-200/80 bg-zinc-50/50 hover:bg-white hover:border-emerald-200 hover:shadow-md transition-all">
-              <HardDrive className="h-8 w-8 text-emerald-600 mb-3" />
-              <div className="text-sm font-bold text-zinc-900">Backblaze B2</div>
-              <div className="text-xs text-zinc-500 mt-0.5">S3 Object Vault</div>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-6 rounded-2xl border border-zinc-200/80 bg-zinc-50/50 hover:bg-white hover:border-emerald-200 hover:shadow-md transition-all">
-              <Globe2 className="h-8 w-8 text-emerald-600 mb-3" />
-              <div className="text-sm font-bold text-zinc-900">Cloudflare Edge</div>
-              <div className="text-xs text-zinc-500 mt-0.5">Global 300+ Cities</div>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-6 rounded-2xl border border-zinc-200/80 bg-zinc-50/50 hover:bg-white hover:border-emerald-200 hover:shadow-md transition-all">
-              <Server className="h-8 w-8 text-emerald-600 mb-3" />
-              <div className="text-sm font-bold text-zinc-900">Supabase Auth &amp; DB</div>
-              <div className="text-xs text-zinc-500 mt-0.5">PostgreSQL &amp; RLS</div>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-6 rounded-2xl border border-zinc-200/80 bg-zinc-50/50 hover:bg-white hover:border-emerald-200 hover:shadow-md transition-all">
-              <ShieldCheck className="h-8 w-8 text-emerald-600 mb-3" />
-              <div className="text-sm font-bold text-zinc-900">Cost Guard 300</div>
-              <div className="text-xs text-zinc-500 mt-0.5">Budget Auto-Limiter</div>
-            </div>
-          </div>
         </div>
-      </section>
 
-      {/* ============================================================ */}
-      {/* FEATURES SECTION                                             */}
-      {/* ============================================================ */}
-      <section id="features" className="py-20 bg-zinc-50 border-t border-zinc-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-              Why DiskDabba
-            </span>
-            <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight">
-              Built for Speed, Protection &amp; Creators
-            </h2>
-            <p className="mt-3 text-base text-zinc-600">
-              Everything you need to store your digital assets with enterprise-grade durability and
-              zero financial risk.
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Card 1 */}
+          <div className="rounded-3xl border border-sky-100 bg-white/80 p-8 shadow-[0_10px_30px_rgba(14,165,233,0.05)] backdrop-blur-xl transition-all duration-300 hover:border-sky-300 hover:shadow-xl hover:-translate-y-1">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-600 mb-6 shadow-sm">
+              <UploadCloud className="h-6 w-6" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900">Direct Presigned S3 Uploads</h3>
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+              Files stream directly from your browser to Backblaze B2 Vault using secure pre-signed URLs. No bottleneck servers.
             </p>
           </div>
 
-          <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="flex flex-col rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm hover:shadow-md transition">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-bold mb-6">
-                <Zap className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold text-zinc-900">Presigned Direct Uploads</h3>
-              <p className="mt-3 text-sm text-zinc-600 leading-relaxed">
-                Your browser uploads directly into Backblaze B2 using time-limited AWS S3
-                signatures. Fast throughput with no intermediate server bottlenecks.
-              </p>
+          {/* Card 2 */}
+          <div className="rounded-3xl border border-sky-100 bg-white/80 p-8 shadow-[0_10px_30px_rgba(14,165,233,0.05)] backdrop-blur-xl transition-all duration-300 hover:border-sky-300 hover:shadow-xl hover:-translate-y-1">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-600 mb-6 shadow-sm">
+              <Zap className="h-6 w-6" />
             </div>
+            <h3 className="text-xl font-bold text-slate-900">Byte-Range Video Streaming</h3>
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+              Zero buffering with HTTP Range-Header seeking. High definition video plays immediately on mobile, tablets and desktop.
+            </p>
+          </div>
 
-            {/* Feature 2 */}
-            <div className="flex flex-col rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm hover:shadow-md transition">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-bold mb-6">
-                <Lock className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold text-zinc-900">Protected ₹300 Budget Cap</h3>
-              <p className="mt-3 text-sm text-zinc-600 leading-relaxed">
-                Never worry about unexpected cloud bills. Automated circuit breakers halt high-egress
-                requests the instant spending approaches your safe monthly threshold.
-              </p>
+          {/* Card 3 */}
+          <div className="rounded-3xl border border-sky-100 bg-white/80 p-8 shadow-[0_10px_30px_rgba(14,165,233,0.05)] backdrop-blur-xl transition-all duration-300 hover:border-sky-300 hover:shadow-xl hover:-translate-y-1">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-600 mb-6 shadow-sm">
+              <TrendingUp className="h-6 w-6" />
             </div>
+            <h3 className="text-xl font-bold text-slate-900">Creator CPM Monetization</h3>
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+              Monetize every eligible view. Tiered CPM calculations update your wallet balance daily with complete audit logs.
+            </p>
+          </div>
 
-            {/* Feature 3 */}
-            <div className="flex flex-col rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm hover:shadow-md transition">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-bold mb-6">
-                <Share2 className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold text-zinc-900">Streamable Share Links</h3>
-              <p className="mt-3 text-sm text-zinc-600 leading-relaxed">
-                Generate clean, unique links with HTTP Byte-Range support so users can seek, scrub,
-                and stream 4K/HD video files seamlessly in their browsers.
-              </p>
+          {/* Card 4 */}
+          <div className="rounded-3xl border border-sky-100 bg-white/80 p-8 shadow-[0_10px_30px_rgba(14,165,233,0.05)] backdrop-blur-xl transition-all duration-300 hover:border-sky-300 hover:shadow-xl hover:-translate-y-1">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-600 mb-6 shadow-sm">
+              <ShieldCheck className="h-6 w-6" />
             </div>
+            <h3 className="text-xl font-bold text-slate-900">Cost & Budget Protection</h3>
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+              Built-in budget caps protect against bandwidth spikes, with strict RLS policies and signed link expiration.
+            </p>
+          </div>
+
+          {/* Card 5 */}
+          <div className="rounded-3xl border border-sky-100 bg-white/80 p-8 shadow-[0_10px_30px_rgba(14,165,233,0.05)] backdrop-blur-xl transition-all duration-300 hover:border-sky-300 hover:shadow-xl hover:-translate-y-1">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-600 mb-6 shadow-sm">
+              <Share2 className="h-6 w-6" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900">Granular Sharing Controls</h3>
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+              Make links Public, Unlisted, or Private. Share via Telegram, WhatsApp, social channels or embed directly.
+            </p>
+          </div>
+
+          {/* Card 6 */}
+          <div className="rounded-3xl border border-sky-100 bg-white/80 p-8 shadow-[0_10px_30px_rgba(14,165,233,0.05)] backdrop-blur-xl transition-all duration-300 hover:border-sky-300 hover:shadow-xl hover:-translate-y-1">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-600 mb-6 shadow-sm">
+              <Smartphone className="h-6 w-6" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900">Android App Readiness</h3>
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+              Equipped with App Links verification and RESTful endpoints ready for our future native Android application.
+            </p>
           </div>
         </div>
       </section>
 
       {/* ============================================================ */}
-      {/* HOW IT WORKS                                                 */}
+      {/* PUBLISHER RATES & PAYOUT PARTNERS (DiskWala Screenshot 2 & 3) */}
       {/* ============================================================ */}
-      <section id="how-it-works" className="py-20 bg-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-              Simple 3-Step Flow
+      <section id="rates" className="relative z-10 py-20 bg-white/90 border-y border-sky-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <span className="text-xs font-bold uppercase tracking-widest text-sky-600 bg-sky-50 px-3.5 py-1 rounded-full border border-sky-200">
+              Trusted Payout Partners
             </span>
-            <h2 className="mt-2 text-3xl font-extrabold text-zinc-900">
-              How DiskDabba Works
+            <h2 className="mt-4 text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              Multiple Payout Methods
             </h2>
-          </div>
+            <p className="mt-2 text-base text-slate-600">
+              Choose from a variety of global payout options. We process creator earnings with a low minimum threshold.
+            </p>
 
-          <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-8 text-center relative">
-            <div className="flex flex-col items-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white font-bold text-lg mb-4 shadow-md">
-                1
-              </div>
-              <h4 className="text-lg font-bold text-zinc-900">Create Free Account</h4>
-              <p className="mt-2 text-sm text-zinc-600 max-w-xs">
-                Sign up in seconds. You get an immediate 5 GB personal storage vault quota.
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white font-bold text-lg mb-4 shadow-md">
-                2
-              </div>
-              <h4 className="text-lg font-bold text-zinc-900">Upload High-Speed Files</h4>
-              <p className="mt-2 text-sm text-zinc-600 max-w-xs">
-                Drag-and-drop video clips, photos, or documents. Uploads bypass servers directly into S3.
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white font-bold text-lg mb-4 shadow-md">
-                3
-              </div>
-              <h4 className="text-lg font-bold text-zinc-900">Share &amp; Distribute</h4>
-              <p className="mt-2 text-sm text-zinc-600 max-w-xs">
-                Copy your shareable link. Viewers can preview and stream with zero sign-up friction.
-              </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-xs font-bold text-sky-800">
+              <span className="rounded-full bg-sky-50 border border-sky-200 px-3.5 py-1.5 flex items-center gap-1.5">
+                ⚡ Fast Processing
+              </span>
+              <span className="rounded-full bg-sky-50 border border-sky-200 px-3.5 py-1.5 flex items-center gap-1.5">
+                🌍 Global Payouts
+              </span>
+              <span className="rounded-full bg-sky-50 border border-sky-200 px-3.5 py-1.5 flex items-center gap-1.5">
+                💳 Low Minimum Threshold (₹100)
+              </span>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* ============================================================ */}
-      {/* FAQ ACCORDION                                                */}
-      {/* ============================================================ */}
-      <section id="faq" className="py-20 bg-zinc-50 border-t border-zinc-200">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-              Got Questions?
-            </span>
-            <h2 className="mt-2 text-3xl font-extrabold text-zinc-900">
-              Frequently Asked Questions
-            </h2>
-          </div>
-
-          <div className="space-y-4">
-            {[
-              {
-                q: "How much storage do I get on DiskDabba?",
-                a: "Every registered creator automatically gets 5 GB of high-speed cloud storage on our European Backblaze B2 cluster at zero cost.",
-              },
-              {
-                q: "What is the maximum file upload size?",
-                a: "Currently, files up to 100 MB per single file can be uploaded in one go. Multipart chunked uploads for multi-gigabyte files are supported under the creator tiers.",
-              },
-              {
-                q: "Can viewers watch videos without downloading?",
-                a: "Yes! DiskDabba generates secure signed URLs supporting HTTP Range headers, which allows modern browsers and media players to stream video without forcing full downloads.",
-              },
-              {
-                q: "How does the ₹300/month cost protection work?",
-                a: "Our backend continuously tallies bandwidth usage against live storage rates. If egress exceeds safety limits, non-critical downloads are gracefully paused so the platform budget is never exceeded.",
-              },
-            ].map((item, idx) => (
+          {/* Payment Partner Logos Row */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 max-w-4xl mx-auto">
+            {["UPI", "PhonePe", "Google Pay", "Bank Transfer", "Paytm"].map((provider) => (
               <div
-                key={idx}
-                className="rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-xs transition"
+                key={provider}
+                className="flex flex-col items-center justify-center p-5 rounded-2xl border border-slate-200/80 bg-white shadow-sm hover:border-sky-300 hover:shadow-md transition"
               >
-                <button
-                  onClick={() => toggleFaq(idx)}
-                  className="flex w-full items-center justify-between p-5 text-left font-semibold text-zinc-900 hover:text-emerald-600"
-                >
-                  <span>{item.q}</span>
-                  <ChevronDown
-                    className={`h-5 w-5 text-zinc-400 transition-transform ${
-                      openFaq === idx ? "rotate-180 text-emerald-600" : ""
-                    }`}
-                  />
-                </button>
-                {openFaq === idx && (
-                  <div className="px-5 pb-5 pt-0 text-sm text-zinc-600 leading-relaxed border-t border-zinc-100 pt-3">
-                    {item.a}
-                  </div>
-                )}
+                <Wallet className="h-6 w-6 text-sky-600 mb-2" />
+                <span className="text-sm font-bold text-slate-800">{provider}</span>
               </div>
             ))}
           </div>
+
+          {/* CPM Rates Table */}
+          <div className="mt-14 max-w-3xl mx-auto rounded-3xl border border-sky-100 bg-slate-50/60 p-6 sm:p-8">
+            <h3 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-sky-600" />
+              <span>How CPM Earnings Work</span>
+            </h3>
+            <p className="text-sm text-slate-600 mb-6">
+              Your earnings are calculated daily based on a tiered CPM (Cost Per 1,000 Views) model. Rates reset every 24 hours.
+            </p>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-xs font-extrabold uppercase text-slate-400">
+                    <th className="pb-3">Daily Views</th>
+                    <th className="pb-3">CPM Rate</th>
+                    <th className="pb-3">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200/60 font-medium text-slate-700">
+                  <tr>
+                    <td className="py-3 font-semibold text-slate-900">First 1,000 views</td>
+                    <td className="py-3 text-sky-600 font-bold">₹85.00 ($1.00)</td>
+                    <td className="py-3 text-xs text-slate-500">Base rate for the first 1K views each day</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 font-semibold text-slate-900">1,001 — 10,000 views</td>
+                    <td className="py-3 text-sky-600 font-bold">₹105.00 ($1.25)</td>
+                    <td className="py-3 text-xs text-slate-500">Enhanced tier for trending creators</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 font-semibold text-slate-900">10,000+ views</td>
+                    <td className="py-3 text-sky-600 font-bold">₹130.00 ($1.55)</td>
+                    <td className="py-3 text-xs text-slate-500">Premium publisher rate with priority support</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ============================================================ */}
-      {/* FINAL CTA BANNER                                             */}
+      {/* 3-STEP GUIDE                                                 */}
       {/* ============================================================ */}
-      <section className="py-20 bg-emerald-600 text-white text-center relative overflow-hidden">
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
-            Ready to Vault &amp; Share Your Files?
+      <section id="how-it-works" className="relative z-10 py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <span className="text-xs font-bold uppercase tracking-widest text-sky-600 bg-sky-50 px-3.5 py-1 rounded-full border border-sky-200">
+            Simple Workflow
+          </span>
+          <h2 className="mt-4 text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+            Start earning in 3 easy steps
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-emerald-100 max-w-xl mx-auto">
-            Join DiskDabba today. Start uploading your videos and documents with zero setup hassle.
-          </p>
-          <div className="mt-8 flex justify-center">
-            <Link
-              href="/signup"
-              className="flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-bold text-emerald-700 shadow-xl hover:bg-emerald-50 transition-all hover:scale-105"
-            >
-              Get Started Now — It&apos;s Free
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+          {/* Step 1 */}
+          <div className="relative rounded-3xl border border-sky-100 bg-white/80 p-8 shadow-sm backdrop-blur-xl">
+            <span className="text-5xl font-black text-sky-100">01</span>
+            <h3 className="mt-4 text-xl font-bold text-slate-900">Upload Files</h3>
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+              Drag and drop videos or documents directly into your dashboard. Direct cloud upload ensures zero wait time.
+            </p>
           </div>
+
+          {/* Step 2 */}
+          <div className="relative rounded-3xl border border-sky-100 bg-white/80 p-8 shadow-sm backdrop-blur-xl">
+            <span className="text-5xl font-black text-sky-100">02</span>
+            <h3 className="mt-4 text-xl font-bold text-slate-900">Share Your Link</h3>
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+              Copy your unique <code className="text-xs font-mono text-sky-700 bg-sky-50 px-1 py-0.5 rounded">/app/:id</code> link and distribute it across Telegram, WhatsApp or YouTube.
+            </p>
+          </div>
+
+          {/* Step 3 */}
+          <div className="relative rounded-3xl border border-sky-100 bg-white/80 p-8 shadow-sm backdrop-blur-xl">
+            <span className="text-5xl font-black text-sky-100">03</span>
+            <h3 className="mt-4 text-xl font-bold text-slate-900">Stream & Earn</h3>
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+              Your viewers enjoy smooth playback, and your creator wallet records real-time impressions and earnings.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/* FAQ SECTION                                                  */}
+      {/* ============================================================ */}
+      <section id="faq" className="relative z-10 py-20 max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="text-center mb-12">
+          <span className="text-xs font-bold uppercase tracking-widest text-sky-600 bg-sky-50 px-3.5 py-1 rounded-full border border-sky-200">
+            Got Questions?
+          </span>
+          <h2 className="mt-4 text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+            Frequently Asked Questions
+          </h2>
+        </div>
+
+        <div className="space-y-4">
+          {[
+            {
+              q: "What is the maximum file upload size?",
+              a: "Currently, single uploads are supported up to 100 MB per file with unlimited storage bandwidth. This ensures ultra-fast speeds and safety caps.",
+            },
+            {
+              q: "How does video streaming work without buffering?",
+              a: "DiskDabba uses HTTP Byte-Range requests directly to Backblaze B2 Object Storage. When a user seeks or skips forward in a video, only the requested fragment is fetched instantly.",
+            },
+            {
+              q: "When can creators withdraw their earnings?",
+              a: "Creators can request a withdrawal once their wallet balance reaches ₹100. Payouts are made directly to UPI or bank accounts.",
+            },
+            {
+              q: "Are my files encrypted and private?",
+              a: "Yes. Every file uploaded is protected with Row Level Security (RLS) in PostgreSQL. You can set files to Private, Unlisted, or Public at any time.",
+            },
+          ].map((item, idx) => (
+            <div
+              key={idx}
+              className="rounded-2xl border border-sky-100 bg-white/80 overflow-hidden shadow-xs backdrop-blur-md"
+            >
+              <button
+                onClick={() => toggleFaq(idx)}
+                className="w-full flex items-center justify-between p-5 text-left text-base font-bold text-slate-900 hover:text-sky-600 transition"
+              >
+                <span>{item.q}</span>
+                <ChevronDown
+                  className={`h-4 w-4 text-slate-400 transition-transform ${
+                    openFaq === idx ? "rotate-180 text-sky-600" : ""
+                  }`}
+                />
+              </button>
+              {openFaq === idx && (
+                <div className="px-5 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+                  {item.a}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </section>
 
       {/* ============================================================ */}
       {/* FOOTER                                                       */}
       {/* ============================================================ */}
-      <footer className="py-12 bg-zinc-950 text-zinc-400 text-sm">
+      <footer className="relative z-10 border-t border-sky-100 bg-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2 text-white font-extrabold text-lg">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white text-xs">
-              <Share2 className="h-3.5 w-3.5" />
-            </span>
-            <span>
-              d<span className="text-emerald-400">i</span>sk
-              <span className="text-emerald-400">Dabba</span>
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <Image
+              src="/logo.jpg"
+              alt="DiskDabba"
+              width={150}
+              height={50}
+              className="h-8 w-auto object-contain"
+            />
+            <span className="text-xs text-slate-400">
+              © {new Date().getFullYear()} DiskDabba. Store • Stream • Share. All rights reserved.
             </span>
           </div>
 
-          <p className="text-center text-xs text-zinc-500">
-            &copy; {new Date().getFullYear()} DiskDabba. Secure, budget-safe cloud storage vault.
-          </p>
-
-          <div className="flex items-center gap-6 text-xs text-zinc-400">
-            <Link href="/login" className="hover:text-emerald-400 transition-colors">
-              Sign In
-            </Link>
-            <Link href="/signup" className="hover:text-emerald-400 transition-colors">
-              Sign Up
-            </Link>
-            <Link href="/admin" className="hover:text-emerald-400 transition-colors">
-              Admin Portal
-            </Link>
+          <div className="flex items-center gap-6 text-sm font-semibold text-slate-500">
+            <a href="#features" className="hover:text-sky-600 transition">Features</a>
+            <a href="#rates" className="hover:text-sky-600 transition">Rates</a>
+            <Link href="/login" className="hover:text-sky-600 transition">Log In</Link>
+            <Link href="/signup" className="hover:text-sky-600 transition">Sign Up</Link>
           </div>
         </div>
       </footer>
