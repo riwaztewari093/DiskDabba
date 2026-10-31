@@ -1,0 +1,27 @@
+name: Build DiskDabba Player APK
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Grant Execute Permission
+        run: chmod +x ./DiskDabba-Player-Android/gradlew
+      - name: Build APK
+        run: |
+          cd DiskDabba-Player-Android
+          ./gradlew assembleDebug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DiskDabba-Player.apk
+          path: DiskDabba-Player-Android/app/build/outputs/apk/debug/app-debug.apk
